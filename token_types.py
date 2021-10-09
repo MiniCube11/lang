@@ -1,0 +1,24 @@
+LPAREN = '('
+RPAREN = ')'
+PLUS = '+'
+MINUS = '-'
+MUL = '*'
+DIV = '/'
+SINGLE_CHAR_TOKENS = {
+    LPAREN: "LPAREN",
+    RPAREN: "RPAREN",
+    PLUS: "PLUS",
+    MINUS: "MINUS",
+    MUL: "MUL",
+    DIV: "DIV"
+}
+OPERATORS = {PLUS, MINUS, MUL, DIV}
+
+C_LPAREN = "LPAREN"
+C_RPAREN = "RPAREN"
+C_PLUS = "PLUS"
+C_MINUS = "MINUS"
+C_MUL = "MUL"
+C_DIV = "DIV"
+
+C_OPERATORS = {C_PLUS, C_MINUS, C_MUL, C_DIV}
