@@ -7,11 +7,12 @@ def run_program(program):
     try:
         lexer = Lexer()
         tokens = lexer.get_tokens(program)
-        parser = Parser()
-        parse_result = parser.parse(tokens)
-        interpreter = Interpreter()
-        result = interpreter.interpret(parse_result)
-        print(result)
+        print(tokens)
+        # parser = Parser()
+        # parse_result = parser.parse(tokens)
+        # interpreter = Interpreter()
+        # result = interpreter.interpret(parse_result)
+        # print(result)
     except Exception as e:
         er.print_error(e)
     except Exception as e:
