@@ -7,7 +7,12 @@ from classes.datatypes import Number
 
 class Interpreter:
     def interpret(self, expression):
-        return self.evaluate(expression)
+        result = self.evaluate(expression)
+        if result is True:
+            return "true"
+        if result is False:
+            return "false"
+        return result
 
     def evaluate(self, expression):
         if isinstance(expression, Expr):
@@ -21,6 +26,20 @@ class Interpreter:
         operator = expression.operator.token_type
         left = self.evaluate(expression.left)
         right = self.evaluate(expression.right)
+        if operator == tt.C_OR:
+            return bool(left or right)
+        if operator == tt.C_AND:
+            return bool(left and right)
+        if operator == tt.C_EQEQUAL:
+            return bool(left == right)
+        if operator == tt.C_GREATERTHAN:
+            return bool(left > right)
+        if operator == tt.C_LESSTHAN:
+            return bool(left < right)
+        if operator == tt.C_GREATEREQUAL:
+            return bool(left >= right)
+        if operator == tt.C_LESSEQUAL:
+            return bool(left <= right)
         if operator == tt.C_PLUS:
             return left + right
         if operator == tt.C_MINUS:

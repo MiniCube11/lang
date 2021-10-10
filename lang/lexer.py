@@ -27,7 +27,7 @@ class Lexer:
         if curr_char in tt.SINGLE_CHAR_TOKENS:
             self.advance()
             return Token(self.curr - 1, 1, self.line, self.program, tt.SINGLE_CHAR_TOKENS[curr_char])
-        if curr_char in tt.COMP_OPERATORS:
+        if curr_char in tt.COMP_OPERATORS or curr_char == tt.EQUAL:
             return self.get_comp_operator()
         if curr_char in tt.BOOL_OPERATOR_CHARS:
             return self.get_bool_operator()
@@ -44,11 +44,15 @@ class Lexer:
         operator = curr_char
         self.advance()
         if self.at_end():
+            if operator == tt.EQUAL:
+                return Token(self.curr, 1, self.line, self.program, tt.C_EQUAL)
             return Token(self.curr, 1, self.line, self.program, tt.COMP_OPERATORS[operator])
         curr_char = self.program[self.curr]
         if curr_char == tt.EQUAL:
             self.advance()
             return Token(self.curr - 2, 2, self.line, self.program, tt.COMP_OPERATORS[operator + curr_char])
+        if operator == tt.EQUAL:
+            return Token(self.curr, 1, self.line, self.program, tt.C_EQUAL)
         return Token(self.curr, 1, self.line, self.program, tt.COMP_OPERATORS[operator])
 
     def get_bool_operator(self):

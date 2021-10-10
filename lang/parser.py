@@ -11,28 +11,31 @@ class Parser:
 
     def expression(self, tokens):
         tokens = self.remove_brackets(tokens)
+        return self.or_expr(tokens)
+
+    def or_expr(self, tokens):
+        if res := self.find_expr(tokens, tt.C_OR):
+            return res
+        return self.and_expr(tokens)
+
+    def and_expr(self, tokens):
+        if res := self.find_expr(tokens, tt.C_AND):
+            return res
+        return self.compare_equals_expr(tokens)
+
+    def compare_equals_expr(self, tokens):
+        if res := self.find_expr(tokens, *list(tt.COMP_OPERATORS.values())):
+            return res
         return self.plus_minus_expr(tokens)
 
     def plus_minus_expr(self, tokens):
-        self.brackets = 0
-        for i in range(len(tokens)-1, -1, -1):
-            self.match_brackets(tokens[i])
-            if self.brackets == 0:
-                res = self.match(tokens[i], tt.C_PLUS, tt.C_MINUS)
-                if res and not self.is_unary_operator(tokens, i-1):
-                    return self.new_expr(tokens, i, res)
-        self.check_brackets(tokens)
+        if res := self.find_expr(tokens, tt.C_PLUS, tt.C_MINUS, check_unary=True):
+            return res
         return self.mul_div_expr(tokens)
 
     def mul_div_expr(self, tokens):
-        self.brackets = 0
-        for i in range(len(tokens)-1, -1, -1):
-            self.match_brackets(tokens[i])
-            if self.brackets == 0:
-                res = self.match(tokens[i], tt.C_MUL, tt.C_DIV)
-                if res:
-                    return self.new_expr(tokens, i, res)
-        self.check_brackets(tokens)
+        if res := self.find_expr(tokens, tt.C_MUL, tt.C_DIV):
+            return res
         return self.number(tokens)
 
     def number(self, tokens):
@@ -55,6 +58,16 @@ class Parser:
         if i < 0 or self.match(tokens[i], *tt.C_OPERATORS):
             return True
         return False
+
+    def find_expr(self, tokens, *match_tokens, check_unary=False):
+        self.brackets = 0
+        for i in range(len(tokens)-1, -1, -1):
+            self.match_brackets(tokens[i])
+            if self.brackets == 0 and (not check_unary or not self.is_unary_operator(tokens, i-1)):
+                res = self.match(tokens[i], *match_tokens)
+                if res:
+                    return self.new_expr(tokens, i, res)
+        self.check_brackets(tokens)
 
     def match(self, curr_token, *tokens):
         for token in tokens:
