@@ -1,8 +1,9 @@
-import token_types as tt
-import errors as er
-from expr import Expr, UnaryExpr
-from token import Token
-from datatypes import Number
+import lang.token_types as tt
+import classes.errors as er
+from classes.expr import Expr, UnaryExpr
+from classes.token import Token
+from classes.datatypes import Number
+
 
 class Interpreter:
     def interpret(self, expression):

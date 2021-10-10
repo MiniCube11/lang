@@ -1,6 +1,6 @@
-import token_types as tt
-import errors as er
-from token import Token
+import lang.token_types as tt
+import classes.errors as er
+from classes.token import Token
 
 
 class Lexer:

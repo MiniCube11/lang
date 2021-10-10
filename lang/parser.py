@@ -1,8 +1,8 @@
 from collections import deque
-import token_types as tt
-import errors as er
-from expr import Expr, UnaryExpr
-from datatypes import Number
+import lang.token_types as tt
+import classes.errors as er
+from classes.expr import Expr, UnaryExpr
+from classes.datatypes import Number
 
 
 class Parser:
@@ -11,7 +11,7 @@ class Parser:
 
     def expression(self, tokens):
         tokens = self.remove_brackets(tokens)
-        return self.plus_minus_expr(tokens)    
+        return self.plus_minus_expr(tokens)
 
     def plus_minus_expr(self, tokens):
         self.brackets = 0
@@ -67,8 +67,7 @@ class Parser:
             self.brackets += 1
         if token.token_type == tt.C_RPAREN:
             self.brackets -= 1
-        
-                      
+
     def check_brackets(self, tokens):
         if self.brackets < 0:
             raise er._ParseError("Expect '(' before ')'.", tokens[-1])
@@ -87,6 +86,7 @@ class Parser:
                 opening = brackets_stack.pop()
                 if opening == 0 and i == len(tokens) - 1:
                     if len(tokens) == 2:
-                        raise er._ParseError("Expect expression inside parentheses.", tokens[-1])
+                        raise er._ParseError(
+                            "Expect expression inside parentheses.", tokens[-1])
                     return tokens[1:-1]
         return tokens

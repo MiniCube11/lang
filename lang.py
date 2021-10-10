@@ -1,7 +1,8 @@
-from lexer import Lexer
-from _parser import Parser
-from interpreter import Interpreter
-import errors as er
+from lang.lexer import Lexer
+from lang.parser import Parser
+from lang.interpreter import Interpreter
+import classes.errors as er
+
 
 def run_program(program):
     try:
@@ -17,6 +18,7 @@ def run_program(program):
         er.print_error(e)
     except Exception as e:
         raise Exception
+
 
 while True:
     program = input("> ")
