@@ -18,6 +18,8 @@ VBAR = '|'
 AND = '&&'
 OR = '||'
 
+NEWLINE = '\n'
+
 C_LPAREN = "LPAREN"
 C_RPAREN = "RPAREN"
 C_PLUS = "PLUS"
@@ -39,6 +41,8 @@ C_AMPER = "AMPER"
 C_VBAR = "VBAR"
 C_OR = "OR"
 C_AND = "AND"
+
+C_EOF = "EOF"
 
 SINGLE_CHAR_TOKENS = {
     LPAREN: C_LPAREN,

@@ -7,7 +7,15 @@ from classes.datatypes import Number, String, Identifier
 
 class Parser:
     def parse(self, tokens):
-        return self.expression(tokens[:-1])
+        last = 0
+        statements = []
+        for i in range(len(tokens)):
+            if tokens[i].token_type == tt.C_EOF:
+                expr = tokens[last:i]
+                if len(expr):
+                    statements.append(self.expression(expr))
+                last = i+1
+        return statements
 
     def expression(self, tokens):
         tokens = self.remove_brackets(tokens)
@@ -22,7 +30,7 @@ class Parser:
                 if len(tokens) == 2:
                     raise er._ParseError(
                         f"Expect expression after '{tt.EQUAL}'.", tokens[1])
-                return AssignExpr(tokens[0], self.expression(tokens[2:]))
+                return AssignExpr(tokens[0].value, self.expression(tokens[2:]))
         return self.or_expr(tokens)
 
     def or_expr(self, tokens):

@@ -9,7 +9,13 @@ class Interpreter:
     def __init__(self, environment):
         self.environment = environment
 
-    def interpret(self, expression):
+    def interpret(self, statements):
+        result = []
+        for stmt in statements:
+            result.append(self.interpret_expr(stmt))
+        return result
+
+    def interpret_expr(self, expression):
         result = self.evaluate(expression)
         if result is True:
             return "true"
@@ -73,6 +79,4 @@ class Interpreter:
 
     def ev_identifier(self, expression):
         value = self.environment.get(expression)
-        if value.isdigit():
-            return int(value)
         return value

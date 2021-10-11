@@ -1,3 +1,6 @@
+import sys
+import argparse
+
 from lang.lexer import Lexer
 from lang.parser import Parser
 from lang.interpreter import Interpreter
@@ -27,6 +30,12 @@ def run_program(program):
         raise Exception
 
 
-while True:
-    program = input("> ")
-    run_program(program)
+if len(sys.argv) == 2:
+    with open(sys.argv[1], "r") as f:
+        lines = f.readlines()
+        program = ''.join(lines)
+        run_program(program)
+else:
+    while True:
+        program = input(">>> ")
+        run_program(program)

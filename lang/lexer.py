@@ -14,7 +14,7 @@ class Lexer:
             token = self.get_next_token()
             if token:
                 tokens.append(token)
-        tokens.append(Token(self.curr, 1, self.line, self.program, "EOF"))
+        tokens.append(Token(self.curr, 1, self.line, self.program, tt.C_EOF))
         return tokens
 
     def get_next_token(self):
@@ -24,6 +24,9 @@ class Lexer:
             if self.at_end():
                 return None
             curr_char = self.program[self.curr]
+        if curr_char == tt.NEWLINE:
+            self.advance()
+            return Token(self.curr - 1, 1, self.line, self.program, tt.C_EOF)
         if curr_char in tt.SINGLE_CHAR_TOKENS:
             self.advance()
             return Token(self.curr - 1, 1, self.line, self.program, tt.SINGLE_CHAR_TOKENS[curr_char])
