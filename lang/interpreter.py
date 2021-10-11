@@ -1,11 +1,14 @@
 import lang.token_types as tt
 import classes.errors as er
-from classes.expr import Expr, UnaryExpr
+from classes.expr import AssignExpr, Expr, UnaryExpr
 from classes.token import Token
-from classes.datatypes import Number
+from classes.datatypes import Number, String, Identifier
 
 
 class Interpreter:
+    def __init__(self, environment):
+        self.environment = environment
+
     def interpret(self, expression):
         result = self.evaluate(expression)
         if result is True:
@@ -15,17 +18,30 @@ class Interpreter:
         return result
 
     def evaluate(self, expression):
+        if isinstance(expression, AssignExpr):
+            return self.ev_assignment(expression)
         if isinstance(expression, Expr):
             return self.ev_expr(expression)
         if isinstance(expression, UnaryExpr):
             return self.ev_unary_expr(expression)
         if isinstance(expression, Number):
             return int(expression.value)
+        if isinstance(expression, String):
+            return expression.value
+        if isinstance(expression, Identifier):
+            return self.ev_identifier(expression)
+
+    def ev_assignment(self, expression):
+        name = expression.name
+        value = self.evaluate(expression.value)
+        self.environment.assign(name, value)
+        return value
 
     def ev_expr(self, expression):
         operator = expression.operator.token_type
         left = self.evaluate(expression.left)
         right = self.evaluate(expression.right)
+
         if operator == tt.C_OR:
             return bool(left or right)
         if operator == tt.C_AND:
@@ -54,3 +70,9 @@ class Interpreter:
     def ev_unary_expr(self, expression):
         if expression.operator.token_type == tt.C_MINUS:
             return -self.evaluate(expression.right)
+
+    def ev_identifier(self, expression):
+        value = self.environment.get(expression)
+        if value.isdigit():
+            return int(value)
+        return value

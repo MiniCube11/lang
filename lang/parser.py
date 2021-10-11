@@ -1,8 +1,8 @@
 from collections import deque
 import lang.token_types as tt
 import classes.errors as er
-from classes.expr import Expr, UnaryExpr
-from classes.datatypes import Number
+from classes.expr import AssignExpr, Expr, UnaryExpr
+from classes.datatypes import Number, String, Identifier
 
 
 class Parser:
@@ -11,6 +11,18 @@ class Parser:
 
     def expression(self, tokens):
         tokens = self.remove_brackets(tokens)
+        return self.assign_expr(tokens)
+
+    def assign_expr(self, tokens):
+        if len(tokens) > 1:
+            if res := self.match(tokens[1], tt.C_EQUAL):
+                if tokens[0].token_type != tt.C_IDENTIFIER:
+                    raise er._ParseError(
+                        f"Expect name before '{tt.EQUAL}'.", tokens[0])
+                if len(tokens) == 2:
+                    raise er._ParseError(
+                        f"Expect expression after '{tt.EQUAL}'.", tokens[1])
+                return AssignExpr(tokens[0], self.expression(tokens[2:]))
         return self.or_expr(tokens)
 
     def or_expr(self, tokens):
@@ -36,13 +48,23 @@ class Parser:
     def mul_div_expr(self, tokens):
         if res := self.find_expr(tokens, tt.C_MUL, tt.C_DIV):
             return res
-        return self.number(tokens)
+        return self.unary_expr(tokens)
 
-    def number(self, tokens):
-        if len(tokens) == 1:
-            return Number(tokens[0])
-        elif res := self.match(tokens[0], tt.C_MINUS):
+    def unary_expr(self, tokens):
+        if res := self.match(tokens[0], tt.C_MINUS):
             return UnaryExpr(res, self.expression(tokens[1:]))
+        return self.single_token(tokens)
+
+    def single_token(self, tokens):
+        token = tokens[0]
+        if len(tokens) == 1:
+            if token.token_type == tt.C_NUMBER:
+                return Number(token)
+            if token.token_type == tt.C_STRING:
+                return String(token)
+            if token.token_type == tt.C_IDENTIFIER:
+                return Identifier(token)
+        raise er._SyntaxError(token.program, token.start, token.line)
 
     def new_expr(self, tokens, i, operator):
         symbol = tokens[i].program[tokens[i].start]
@@ -61,13 +83,23 @@ class Parser:
 
     def find_expr(self, tokens, *match_tokens, check_unary=False):
         self.brackets = 0
-        for i in range(len(tokens)-1, -1, -1):
+        for i in range(self.skip_assign_expr(tokens), -1, -1):
             self.match_brackets(tokens[i])
             if self.brackets == 0 and (not check_unary or not self.is_unary_operator(tokens, i-1)):
                 res = self.match(tokens[i], *match_tokens)
                 if res:
                     return self.new_expr(tokens, i, res)
         self.check_brackets(tokens)
+
+    def skip_assign_expr(self, tokens):
+        self.brackets = 0
+        self.last_equal = len(tokens)-1
+        for i in range(len(tokens)-1, -1, -1):
+            self.match_brackets(tokens[i])
+            if self.brackets == 0 and self.match(tokens[i], tt.C_EQUAL):
+                self.last_equal = i
+        self.check_brackets(tokens)
+        return self.last_equal
 
     def match(self, curr_token, *tokens):
         for token in tokens:
@@ -78,7 +110,7 @@ class Parser:
     def match_brackets(self, token):
         if token.token_type == tt.C_LPAREN:
             self.brackets += 1
-        if token.token_type == tt.C_RPAREN:
+        elif token.token_type == tt.C_RPAREN:
             self.brackets -= 1
 
     def check_brackets(self, tokens):

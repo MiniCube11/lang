@@ -1,12 +1,15 @@
 from lang.lexer import Lexer
 from lang.parser import Parser
 from lang.interpreter import Interpreter
+from classes.environment import Environment
 import classes.errors as er
 import settings
 
+environment = Environment()
+
 lexer = Lexer()
 parser = Parser()
-interpreter = Interpreter()
+interpreter = Interpreter(environment)
 
 
 def run_program(program):
