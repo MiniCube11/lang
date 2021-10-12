@@ -104,6 +104,8 @@ class Lexer:
             if self.at_end():
                 break
             curr_char = self.program[self.curr]
+        if identifier in tt.KEYWORDS:
+            return Token(self.curr - len(identifier), len(identifier), self.line, self.program, tt.C_KEYWORD, tt.KEYWORDS[identifier])
         return Token(self.curr - len(identifier), len(identifier), self.line, self.program, tt.C_IDENTIFIER, identifier)
 
     def is_identifier_char(self, char):

@@ -1,5 +1,6 @@
 import lang.token_types as tt
 import classes.errors as er
+from classes.stmt import IfStmt
 from classes.expr import AssignExpr, Expr, UnaryExpr
 from classes.token import Token
 from classes.datatypes import Number, String, Identifier
@@ -12,18 +13,28 @@ class Interpreter:
     def interpret(self, statements):
         result = []
         for stmt in statements:
-            result.append(self.interpret_expr(stmt))
+            res = self.interpret_expr(stmt)
+            if isinstance(res, list):
+                for stmt in res:
+                    result.append(self.format_data(stmt))
+            else:
+                result.append(res)
         return result
+
+    def format_data(self, res):
+        if res is True:
+            return "true"
+        if res is False:
+            return "false"
+        return res
 
     def interpret_expr(self, expression):
         result = self.evaluate(expression)
-        if result is True:
-            return "true"
-        if result is False:
-            return "false"
-        return result
+        return self.format_data(result)
 
     def evaluate(self, expression):
+        if isinstance(expression, IfStmt):
+            return self.ev_if_stmt(expression)
         if isinstance(expression, AssignExpr):
             return self.ev_assignment(expression)
         if isinstance(expression, Expr):
@@ -36,6 +47,14 @@ class Interpreter:
             return expression.value
         if isinstance(expression, Identifier):
             return self.ev_identifier(expression)
+
+    def ev_if_stmt(self, expression):
+        if self.evaluate(expression.condition):
+            result = []
+            for stmt in expression.statements:
+                if res := self.evaluate(stmt):
+                    result.append(res)
+            return result
 
     def ev_assignment(self, expression):
         name = expression.name

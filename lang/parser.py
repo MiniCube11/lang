@@ -1,21 +1,90 @@
 from collections import deque
 import lang.token_types as tt
 import classes.errors as er
+from classes.stmt import IfStmt
 from classes.expr import AssignExpr, Expr, UnaryExpr
 from classes.datatypes import Number, String, Identifier
 
 
 class Parser:
     def parse(self, tokens):
-        last = 0
+        self.curr = 0
+        return self.find_statements(tokens)
+
+    def find_statements(self, tokens, end=None):
+        print(tokens[self.curr:end], "ASDFADSFDFDFADS")
+        if not end:
+            end = len(tokens)
         statements = []
-        for i in range(len(tokens)):
-            if tokens[i].token_type == tt.C_EOF:
-                expr = tokens[last:i]
-                if len(expr):
-                    statements.append(self.expression(expr))
-                last = i+1
+        while self.curr < end:
+            stmt = self.find_stmt(tokens)
+            if stmt:
+                statements.append(stmt)
         return statements
+
+    def find_stmt(self, tokens):
+        if tokens[self.curr].value == tt.C_IF:
+            return self.if_stmt(tokens)
+        else:
+            eof_index = self.next_eof(self.curr, tokens)
+            curr_tokens = tokens[self.curr:eof_index]
+            stmt = None
+            if curr_tokens:
+                stmt = self.expression(tokens[self.curr:eof_index])
+            self.curr = eof_index + 1
+            return stmt
+
+    def next_eof(self, curr, tokens):
+        for i in range(curr, len(tokens)):
+            if tokens[i].token_type == tt.C_EOF:
+                return i
+        return len(tokens) - 1
+
+    def if_stmt(self, tokens):
+        start_pos = self.curr
+        res = self.match(tokens[start_pos+1], tt.C_LPAREN)
+        if not res:
+            raise er._ParseError(
+                f"Expect '{tt.LPAREN}' after {tt.IF} keyword.", tokens[start_pos+1])
+        self.brackets = 0
+        self.curr += 1
+        while self.curr < len(tokens):
+            self.match_brackets(tokens[self.curr])
+            if self.brackets == 0:
+                break
+            self.curr += 1
+        condition = tokens[start_pos+2:self.curr]
+        if not condition:
+            raise er._ParseError(
+                "Expect condition inside parentheses.", tokens[start_pos+1])
+        self.curr += 1
+        while self.match(tokens[self.curr], tt.C_EOF):
+            self.curr += 1
+        statements = []
+        if self.match(tokens[self.curr], tt.C_LCURL):
+            start_pos = self.curr
+            while self.curr < len(tokens):
+                if self.match(tokens[self.curr], tt.C_RCURL):
+                    break
+                self.curr += 1
+            if self.curr < len(tokens):
+                end = self.curr
+                self.curr = start_pos + 1
+                statements = self.find_statements(tokens, end)
+                if not statements:
+                    raise er._ParseError(
+                        f"Expect statements inside curly braces.", tokens[self.curr-1])
+                self.curr += 1
+            else:
+                raise er._ParseError(
+                    f"Expect '{tt.RCURL}' after '{tt.LCURL}'.", tokens[self.curr-1])
+        else:
+            stmt = self.find_stmt(tokens)
+            if not stmt:
+                raise er._ParseError(
+                    f"Expect expression after {tt.IF} statement.", tokens[self.curr-1])
+            statements.append(stmt)
+        return IfStmt(self.expression(condition), statements)
 
     def expression(self, tokens):
         tokens = self.remove_brackets(tokens)

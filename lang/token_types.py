@@ -1,5 +1,7 @@
 LPAREN = '('
 RPAREN = ')'
+LCURL = '{'
+RCURL = '}'
 PLUS = '+'
 MINUS = '-'
 MUL = '*'
@@ -18,10 +20,15 @@ VBAR = '|'
 AND = '&&'
 OR = '||'
 
+IF = 'if'
+ELSE = 'else'
+
 NEWLINE = '\n'
 
 C_LPAREN = "LPAREN"
 C_RPAREN = "RPAREN"
+C_LCURL = "LCURL"
+C_RCURL = "RCURL"
 C_PLUS = "PLUS"
 C_MINUS = "MINUS"
 C_MUL = "MUL"
@@ -42,11 +49,17 @@ C_VBAR = "VBAR"
 C_OR = "OR"
 C_AND = "AND"
 
+C_KEYWORD = "KEYWORD"
+C_IF = "IF"
+C_ELSE = "ELSE"
+
 C_EOF = "EOF"
 
 SINGLE_CHAR_TOKENS = {
     LPAREN: C_LPAREN,
     RPAREN: C_RPAREN,
+    LCURL: C_LCURL,
+    RCURL: C_RCURL,
     PLUS: C_PLUS,
     MINUS: C_MINUS,
     MUL: C_MUL,
@@ -64,6 +77,11 @@ COMP_OPERATORS = {
 BOOL_OPERATORS = {
     OR: C_OR,
     AND: C_AND
+}
+
+KEYWORDS = {
+    IF: C_IF,
+    ELSE: C_ELSE
 }
 
 BOOL_OPERATOR_CHARS = {AMPER, VBAR}

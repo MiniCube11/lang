@@ -23,7 +23,7 @@ def run_program(program):
         if settings.DEBUG:
             print(tokens)
             print(parse_result)
-        print(result)
+        print(*result, sep='\n')
     except Exception as e:
         er.print_error(e)
     except Exception as e:
