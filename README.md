@@ -6,8 +6,16 @@ A toy interpreted programming language written in Python.
 
 Make sure you have the latest Python version installed.
 
-```python
-python lang.py <name-of-program>
+Running `lang.py` will open up an interactive repl.
+
+```
+python lang.py
+```
+
+To run a file:
+
+```
+python lang.py <name-of-file>
 ```
 
 ## Syntax
