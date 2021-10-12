@@ -1,7 +1,7 @@
 from collections import deque
 import lang.token_types as tt
 import classes.errors as er
-from classes.stmt import IfStmt
+from classes.stmt import IfStmt, WhileStmt
 from classes.expr import AssignExpr, Expr, UnaryExpr
 from classes.datatypes import Number, String, Identifier
 
@@ -24,14 +24,15 @@ class Parser:
     def find_stmt(self, tokens):
         if tokens[self.curr].value == tt.C_IF:
             return self.if_stmt(tokens)
-        else:
-            eof_index = self.next_eof(self.curr, tokens)
-            curr_tokens = tokens[self.curr:eof_index]
-            stmt = None
-            if curr_tokens:
-                stmt = self.expression(tokens[self.curr:eof_index])
-            self.curr = eof_index + 1
-            return stmt
+        if tokens[self.curr].value == tt.C_WHILE:
+            return self.while_stmt(tokens)
+        eof_index = self.next_eof(self.curr, tokens)
+        curr_tokens = tokens[self.curr:eof_index]
+        stmt = None
+        if curr_tokens:
+            stmt = self.expression(tokens[self.curr:eof_index])
+        self.curr = eof_index + 1
+        return stmt
 
     def next_eof(self, curr, tokens):
         for i in range(curr, len(tokens)):
@@ -51,6 +52,19 @@ class Parser:
             raise er._ParseError(
                 f"Expect expression after {tt.IF} statement.", tokens[self.curr-1])
         return IfStmt(self.expression(condition), [stmt])
+
+    def while_stmt(self, tokens):
+        condition = self.find_condition(tokens, tt.WHILE)
+        while self.match(tokens[self.curr], tt.C_EOF):
+            self.curr += 1
+        statements = []
+        if self.match(tokens[self.curr], tt.C_LCURL):
+            return WhileStmt(self.expression(condition), self.find_block(tokens))
+        stmt = self.find_stmt(tokens)
+        if not stmt:
+            raise er._ParseError(
+                f"Expect expression after {tt.WHILE} statement.", tokens[self.curr-1])
+        return WhileStmt(self.expression(condition), [stmt])
 
     def find_condition(self, tokens, keyword):
         start_pos = self.curr

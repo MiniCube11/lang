@@ -1,6 +1,6 @@
 import lang.token_types as tt
 import classes.errors as er
-from classes.stmt import IfStmt
+from classes.stmt import IfStmt, WhileStmt
 from classes.expr import AssignExpr, Expr, UnaryExpr
 from classes.token import Token
 from classes.datatypes import Number, String, Identifier
@@ -35,6 +35,8 @@ class Interpreter:
     def evaluate(self, expression):
         if isinstance(expression, IfStmt):
             return self.ev_if_stmt(expression)
+        if isinstance(expression, WhileStmt):
+            return self.ev_while_stmt(expression)
         if isinstance(expression, AssignExpr):
             return self.ev_assignment(expression)
         if isinstance(expression, Expr):
@@ -55,6 +57,14 @@ class Interpreter:
                 if res := self.evaluate(stmt):
                     result.append(res)
             return result
+
+    def ev_while_stmt(self, expression):
+        result = []
+        while self.evaluate(expression.condition):
+            for stmt in expression.statements:
+                if res := self.evaluate(stmt):
+                    result.append(res)
+        return result
 
     def ev_assignment(self, expression):
         name = expression.name
