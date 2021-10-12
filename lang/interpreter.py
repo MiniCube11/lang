@@ -1,4 +1,4 @@
-import lang.token_types as tt
+import grammar.token_types as tt
 import classes.errors as er
 from classes.stmt import IfStmt, WhileStmt
 from classes.expr import AssignExpr, Expr, UnaryExpr
