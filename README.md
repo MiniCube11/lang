@@ -2,6 +2,8 @@
 
 A toy interpreted programming language written in Python.
 
+_The language is incomplete. There are currently no print statements so all expressions are printed, which may make the output a bit messy._
+
 ## Run this project
 
 Make sure you have the latest Python version installed.
