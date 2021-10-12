@@ -11,26 +11,26 @@ class Interpreter:
         self.environment = environment
 
     def interpret(self, statements):
-        result = []
+        results = []
         for stmt in statements:
-            res = self.interpret_expr(stmt)
-            if isinstance(res, list):
-                for stmt in res:
-                    result.append(self.format_data(stmt))
+            interpret_res = self.interpret_expr(stmt)
+            if isinstance(interpret_res, list):
+                for value in interpret_res:
+                    results.append(self.format_value(value))
             else:
-                result.append(res)
-        return result
+                results.append(interpret_res)
+        return results
 
-    def format_data(self, res):
-        if res is True:
+    def format_value(self, value):
+        if value is True:
             return "true"
-        if res is False:
+        if value is False:
             return "false"
-        return res
+        return value
 
     def interpret_expr(self, expression):
         result = self.evaluate(expression)
-        return self.format_data(result)
+        return self.format_value(result)
 
     def evaluate(self, expression):
         if isinstance(expression, IfStmt):

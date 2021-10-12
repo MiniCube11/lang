@@ -12,7 +12,6 @@ class Parser:
         return self.find_statements(tokens)
 
     def find_statements(self, tokens, end=None):
-        print(tokens[self.curr:end], "ASDFADSFDFDFADS")
         if not end:
             end = len(tokens)
         statements = []
@@ -41,11 +40,24 @@ class Parser:
         return len(tokens) - 1
 
     def if_stmt(self, tokens):
+        condition = self.find_condition(tokens, tt.IF)
+        while self.match(tokens[self.curr], tt.C_EOF):
+            self.curr += 1
+        statements = []
+        if self.match(tokens[self.curr], tt.C_LCURL):
+            return IfStmt(self.expression(condition), self.find_block(tokens))
+        stmt = self.find_stmt(tokens)
+        if not stmt:
+            raise er._ParseError(
+                f"Expect expression after {tt.IF} statement.", tokens[self.curr-1])
+        return IfStmt(self.expression(condition), [stmt])
+
+    def find_condition(self, tokens, keyword):
         start_pos = self.curr
         res = self.match(tokens[start_pos+1], tt.C_LPAREN)
         if not res:
             raise er._ParseError(
-                f"Expect '{tt.LPAREN}' after {tt.IF} keyword.", tokens[start_pos+1])
+                f"Expect '{tt.LPAREN}' after {keyword} keyword.", tokens[start_pos+1])
         self.brackets = 0
         self.curr += 1
         while self.curr < len(tokens):
@@ -58,33 +70,26 @@ class Parser:
             raise er._ParseError(
                 "Expect condition inside parentheses.", tokens[start_pos+1])
         self.curr += 1
-        while self.match(tokens[self.curr], tt.C_EOF):
+        return condition
+
+    def find_block(self, tokens):
+        start_pos = self.curr
+        while self.curr < len(tokens):
+            if self.match(tokens[self.curr], tt.C_RCURL):
+                break
             self.curr += 1
-        statements = []
-        if self.match(tokens[self.curr], tt.C_LCURL):
-            start_pos = self.curr
-            while self.curr < len(tokens):
-                if self.match(tokens[self.curr], tt.C_RCURL):
-                    break
-                self.curr += 1
-            if self.curr < len(tokens):
-                end = self.curr
-                self.curr = start_pos + 1
-                statements = self.find_statements(tokens, end)
-                if not statements:
-                    raise er._ParseError(
-                        f"Expect statements inside curly braces.", tokens[self.curr-1])
-                self.curr += 1
-            else:
+        if self.curr < len(tokens):
+            end = self.curr
+            self.curr = start_pos + 1
+            statements = self.find_statements(tokens, end)
+            if not statements:
                 raise er._ParseError(
-                    f"Expect '{tt.RCURL}' after '{tt.LCURL}'.", tokens[self.curr-1])
+                    f"Expect statements inside curly braces.", tokens[self.curr-1])
+            self.curr += 1
+            return statements
         else:
-            stmt = self.find_stmt(tokens)
-            if not stmt:
-                raise er._ParseError(
-                    f"Expect expression after {tt.IF} statement.", tokens[self.curr-1])
-            statements.append(stmt)
-        return IfStmt(self.expression(condition), statements)
+            raise er._ParseError(
+                f"Expect '{tt.RCURL}' after '{tt.LCURL}'.", tokens[self.curr-1])
 
     def expression(self, tokens):
         tokens = self.remove_brackets(tokens)
