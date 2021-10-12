@@ -1,5 +1,4 @@
 import sys
-import argparse
 
 from lang.lexer import Lexer
 from lang.parser import Parser
