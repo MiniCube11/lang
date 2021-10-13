@@ -57,6 +57,13 @@ class Interpreter:
                 if res := self.evaluate(stmt):
                     result.append(res)
             return result
+        else:
+            if expression.else_statements:
+                result = []
+                for stmt in expression.else_statements:
+                    if res := self.evaluate(stmt):
+                        result.append(res)
+                return result
 
     def ev_while_stmt(self, expression):
         result = []

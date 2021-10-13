@@ -42,29 +42,21 @@ class Parser:
 
     def if_stmt(self, tokens):
         condition = self.find_condition(tokens, tt.IF)
-        while self.match(tokens[self.curr], tt.C_EOF):
+        statements = self.find_block_or_stmt(tokens, tt.IF)
+        while self.curr < len(tokens) and self.match(tokens[self.curr], tt.C_EOF):
             self.curr += 1
-        statements = []
-        if self.match(tokens[self.curr], tt.C_LCURL):
-            return IfStmt(self.expression(condition), self.find_block(tokens))
-        stmt = self.find_stmt(tokens)
-        if not stmt:
-            raise er._ParseError(
-                f"Expect expression after {tt.IF} statement.", tokens[self.curr-1])
-        return IfStmt(self.expression(condition), [stmt])
+        if self.curr >= len(tokens):
+            return IfStmt(self.expression(condition), statements)
+        else_statements = None
+        if tokens[self.curr].value == tt.C_ELSE:
+            self.curr += 1
+            else_statements = self.find_block_or_stmt(tokens, tt.ELSE)
+        return IfStmt(self.expression(condition), statements, else_statements)
 
     def while_stmt(self, tokens):
         condition = self.find_condition(tokens, tt.WHILE)
-        while self.match(tokens[self.curr], tt.C_EOF):
-            self.curr += 1
-        statements = []
-        if self.match(tokens[self.curr], tt.C_LCURL):
-            return WhileStmt(self.expression(condition), self.find_block(tokens))
-        stmt = self.find_stmt(tokens)
-        if not stmt:
-            raise er._ParseError(
-                f"Expect expression after {tt.WHILE} statement.", tokens[self.curr-1])
-        return WhileStmt(self.expression(condition), [stmt])
+        statements = self.find_block_or_stmt(tokens, tt.WHILE)
+        return WhileStmt(self.expression(condition), statements)
 
     def find_condition(self, tokens, keyword):
         start_pos = self.curr
@@ -104,6 +96,22 @@ class Parser:
         else:
             raise er._ParseError(
                 f"Expect '{tt.RCURL}' after '{tt.LCURL}'.", tokens[self.curr-1])
+
+    def find_block_or_stmt(self, tokens, keyword):
+        start_pos = self.curr - 1
+        while self.curr < len(tokens) and self.match(tokens[self.curr], tt.C_EOF):
+            self.curr += 1
+        if self.curr >= len(tokens):
+            raise er._ParseError(
+                f"Expect a block or statement after '{keyword}''.", tokens[start_pos])
+        if self.match(tokens[self.curr], tt.C_LCURL):
+            return self.find_block(tokens)
+        else:
+            stmt = self.find_stmt(tokens)
+            if not stmt:
+                raise er._ParseError(
+                    f"Expect expression after '{keyword}'.", tokens[self.curr-1])
+            return [stmt]
 
     def expression(self, tokens):
         tokens = self.remove_brackets(tokens)
