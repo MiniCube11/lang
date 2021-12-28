@@ -26,17 +26,17 @@ class Parser:
             return self.if_stmt(tokens)
         if tokens[self.curr].value == tt.C_WHILE:
             return self.while_stmt(tokens)
-        eof_index = self.next_eof(self.curr, tokens)
-        curr_tokens = tokens[self.curr:eof_index]
+        end_token_index = self.end_token_index(self.curr, tokens)
+        curr_tokens = tokens[self.curr:end_token_index]
         stmt = None
         if curr_tokens:
-            stmt = self.expression(tokens[self.curr:eof_index])
-        self.curr = eof_index + 1
+            stmt = self.expression(tokens[self.curr:end_token_index])
+        self.curr = end_token_index + 1
         return stmt
 
-    def next_eof(self, curr, tokens):
-        for i in range(curr, len(tokens)):
-            if tokens[i].token_type == tt.C_EOF:
+    def end_token_index(self, curr, tokens):
+        for i in range(curr, len(tokens)):            
+            if self.match(tokens[i], tt.C_EOF, tt.C_RCURL):
                 return i
         return len(tokens) - 1
 
@@ -84,7 +84,7 @@ class Parser:
             if self.match(tokens[self.curr], tt.C_RCURL):
                 break
             self.curr += 1
-        if self.curr < len(tokens):
+        if self.curr < len(tokens) and self.match(tokens[self.curr], tt.C_RCURL):
             end = self.curr
             self.curr = start_pos + 1
             statements = self.find_statements(tokens, end)
