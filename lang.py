@@ -1,11 +1,11 @@
 import sys
+import argparse
 
 from lang.lexer import Lexer
 from lang.parser import Parser
 from lang.interpreter import Interpreter
 from classes.environment import Environment
 import classes.errors as er
-import settings
 
 environment = Environment()
 
@@ -13,13 +13,17 @@ lexer = Lexer()
 parser = Parser()
 interpreter = Interpreter(environment)
 
+argparser = argparse.ArgumentParser()
+argparser.add_argument("--debug", "-d", type=bool, default=False)
+args, uknownargs = argparser.parse_known_args()
 
-def run_program(program):
+
+def run_program(program, debug_mode=False):
     try:
         tokens = lexer.get_tokens(program)
         parse_result = parser.parse(tokens)
         result = interpreter.interpret(parse_result)
-        if settings.DEBUG:
+        if debug_mode:
             print(tokens)
             print(parse_result)
         print(*result, sep='\n')
@@ -29,11 +33,12 @@ def run_program(program):
         raise Exception
 
 
-if len(sys.argv) == 2:
-    with open(sys.argv[1], "r") as f:
+if len(sys.argv) >= 2:
+    filename = sys.argv[1]
+    with open(filename, "r") as f:
         lines = f.readlines()
         program = ''.join(lines)
-        run_program(program)
+        run_program(program, args.debug)
 else:
     while True:
         program = input(">>> ")
