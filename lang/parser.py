@@ -78,7 +78,7 @@ class Parser:
         self.curr += 1
         return condition
 
-    def find_block(self, tokens, lcurl=False):
+    def find_block(self, tokens):
         start_pos = self.curr
         while self.curr < len(tokens):
             if self.match(tokens[self.curr], tt.C_RCURL):
@@ -105,7 +105,7 @@ class Parser:
             raise er._ParseError(
                 f"Expect a block or statement after '{keyword}''.", tokens[start_pos])
         if self.match(tokens[self.curr], tt.C_LCURL):
-            return self.find_block(tokens, lcurl=True)
+            return self.find_block(tokens)
         else:
             stmt = self.find_stmt(tokens)
             if not stmt:
