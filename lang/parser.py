@@ -32,8 +32,8 @@ class Parser:
         curr_tokens = tokens[self.curr:end_token_index]
         stmt = None
         if curr_tokens:
-            stmt = self.expression(tokens[self.curr:end_token_index])
-        self.curr = end_token_index + 1
+            stmt = self.expression(curr_tokens)
+        self.advance(tokens, advance_by=end_token_index + 1 - self.curr)
         return stmt
 
     def end_token_index(self, curr, tokens, lcurl=False):
@@ -46,12 +46,12 @@ class Parser:
         condition = self.find_condition(tokens, tt.IF)
         statements = self.find_block_or_stmt(tokens, tt.IF)
         while self.curr < len(tokens) and self.match(tokens[self.curr], tt.C_EOF):
-            self.curr += 1
+            self.advance(tokens)
         if self.curr >= len(tokens):
             return IfStmt(self.expression(condition), statements)
         else_statements = None
         if tokens[self.curr].value == tt.C_ELSE:
-            self.curr += 1
+            self.advance(tokens)
             else_statements = self.find_block_or_stmt(tokens, tt.ELSE)
         return IfStmt(self.expression(condition), statements, else_statements)
 
@@ -63,7 +63,7 @@ class Parser:
     def print_stmt(self, tokens):
         start_pos = self.curr
         while self.curr < len(tokens) and not self.match(tokens[self.curr], tt.C_EOF):
-            self.curr += 1
+            self.advance(tokens)
         return PrintStmt(self.expression(tokens[start_pos+1:self.curr]))
 
     def find_condition(self, tokens, keyword):
@@ -73,17 +73,17 @@ class Parser:
             raise er._ParseError(
                 f"Expect '{tt.LPAREN}' after {keyword} keyword.", tokens[start_pos+1])
         self.brackets = 0
-        self.curr += 1
+        self.advance(tokens)
         while self.curr < len(tokens):
             self.match_brackets(tokens[self.curr])
             if self.brackets == 0:
                 break
-            self.curr += 1
+            self.advance(tokens)
         condition = tokens[start_pos+2:self.curr]
         if not condition:
             raise er._ParseError(
                 "Expect condition inside parentheses.", tokens[start_pos+1])
-        self.curr += 1
+        self.advance(tokens)
         return condition
 
     def find_block(self, tokens):
@@ -91,15 +91,15 @@ class Parser:
         while self.curr < len(tokens):
             if self.match(tokens[self.curr], tt.C_RCURL):
                 break
-            self.curr += 1
+            self.advance(tokens)
         if self.curr < len(tokens) and self.match(tokens[self.curr], tt.C_RCURL):
             end = self.curr
-            self.curr = start_pos + 1
+            self.advance(tokens, advance_by=start_pos + 1 - self.curr)
             statements = self.find_statements(tokens, end, lcurl=True)
             if not statements:
                 raise er._ParseError(
                     f"Expect statements inside curly braces.", tokens[self.curr-1])
-            self.curr += 1
+            self.advance(tokens)
             return statements
         else:
             raise er._ParseError(
@@ -108,7 +108,7 @@ class Parser:
     def find_block_or_stmt(self, tokens, keyword):
         start_pos = self.curr - 1
         while self.curr < len(tokens) and self.match(tokens[self.curr], tt.C_EOF):
-            self.curr += 1
+            self.advance(tokens)
         if self.curr >= len(tokens):
             raise er._ParseError(
                 f"Expect a block or statement after '{keyword}''.", tokens[start_pos])
@@ -127,7 +127,7 @@ class Parser:
 
     def assign_expr(self, tokens):
         if len(tokens) > 1:
-            if res := self.match(tokens[1], tt.C_EQUAL):
+            if self.match(tokens[1], tt.C_EQUAL):
                 if tokens[0].token_type != tt.C_IDENTIFIER:
                     raise er._ParseError(
                         f"Expect name before '{tt.EQUAL}'.", tokens[0])
@@ -218,6 +218,12 @@ class Parser:
             if curr_token.token_type == token:
                 return curr_token
         return None
+
+    def advance(self, tokens, advance_by=1):
+        if self.curr <= len(tokens) - advance_by:
+            self.curr += advance_by
+            return True
+        return False
 
     def match_brackets(self, token):
         if token.token_type == tt.C_LPAREN:
