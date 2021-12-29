@@ -11,22 +11,22 @@ class Parser:
         self.curr = 0
         return self.find_statements(tokens)
 
-    def find_statements(self, tokens, end=None):
+    def find_statements(self, tokens, end=None, lcurl=False):
         if not end:
             end = len(tokens)
         statements = []
         while self.curr < end:
-            stmt = self.find_stmt(tokens)
+            stmt = self.find_stmt(tokens, lcurl)
             if stmt:
                 statements.append(stmt)
         return statements
 
-    def find_stmt(self, tokens):
+    def find_stmt(self, tokens, lcurl=False):
         if tokens[self.curr].value == tt.C_IF:
             return self.if_stmt(tokens)
         if tokens[self.curr].value == tt.C_WHILE:
             return self.while_stmt(tokens)
-        end_token_index = self.end_token_index(self.curr, tokens)
+        end_token_index = self.end_token_index(self.curr, tokens, lcurl=lcurl)
         curr_tokens = tokens[self.curr:end_token_index]
         stmt = None
         if curr_tokens:
@@ -34,9 +34,9 @@ class Parser:
         self.curr = end_token_index + 1
         return stmt
 
-    def end_token_index(self, curr, tokens):
-        for i in range(curr, len(tokens)):            
-            if self.match(tokens[i], tt.C_EOF, tt.C_RCURL):
+    def end_token_index(self, curr, tokens, lcurl=False):
+        for i in range(curr, len(tokens)):
+            if self.match(tokens[i], tt.C_EOF) or (lcurl and self.match(tokens[i], tt.C_RCURL)):
                 return i
         return len(tokens) - 1
 
@@ -78,7 +78,7 @@ class Parser:
         self.curr += 1
         return condition
 
-    def find_block(self, tokens):
+    def find_block(self, tokens, lcurl=False):
         start_pos = self.curr
         while self.curr < len(tokens):
             if self.match(tokens[self.curr], tt.C_RCURL):
@@ -87,7 +87,7 @@ class Parser:
         if self.curr < len(tokens) and self.match(tokens[self.curr], tt.C_RCURL):
             end = self.curr
             self.curr = start_pos + 1
-            statements = self.find_statements(tokens, end)
+            statements = self.find_statements(tokens, end, lcurl=True)
             if not statements:
                 raise er._ParseError(
                     f"Expect statements inside curly braces.", tokens[self.curr-1])
@@ -105,7 +105,7 @@ class Parser:
             raise er._ParseError(
                 f"Expect a block or statement after '{keyword}''.", tokens[start_pos])
         if self.match(tokens[self.curr], tt.C_LCURL):
-            return self.find_block(tokens)
+            return self.find_block(tokens, lcurl=True)
         else:
             stmt = self.find_stmt(tokens)
             if not stmt:
