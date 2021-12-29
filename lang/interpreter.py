@@ -20,7 +20,7 @@ class Interpreter:
                     self.results.append(self.format_value(value))
             else:
                 self.results.append(interpret_res)
-        return self.printed_results
+        return self.results, self.printed_results
 
     def format_value(self, value):
         if value is True:

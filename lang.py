@@ -18,7 +18,7 @@ argparser.add_argument("--debug", "-d", type=bool, default=False)
 args, uknownargs = argparser.parse_known_args()
 
 
-def run_program(program, debug_mode=False):
+def run_program(program, repl=False, debug_mode=False):
     try:
         tokens = lexer.get_tokens(program)
         if debug_mode:
@@ -28,8 +28,10 @@ def run_program(program, debug_mode=False):
         if debug_mode:
             print(parse_result)
 
-        result = interpreter.interpret(parse_result)
-        print(*result, sep='\n')
+        results, printed_results = interpreter.interpret(parse_result)
+        if not repl:
+            results = printed_results
+        print(*results, sep='\n')
 
     except Exception as e:
         er.print_error(e)
@@ -42,8 +44,8 @@ if len(sys.argv) >= 2:
     with open(filename, "r") as f:
         lines = f.readlines()
         program = ''.join(lines)
-        run_program(program, args.debug)
+        run_program(program, debug_mode=args.debug)
 else:
     while True:
         program = input(">>> ")
-        run_program(program)
+        run_program(program, repl=True)
