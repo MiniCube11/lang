@@ -4,7 +4,7 @@ A toy interpreted programming language written in Python.
 
 ## Run this project
 
-Make sure you have the latest Python version installed.
+Make sure you have Python installed on your computer.
 
 Running `lang.py` will open up an interactive repl.
 
@@ -15,8 +15,10 @@ python lang.py
 To run a file:
 
 ```
-python lang.py <name-of-file>
+python lang.py <filename>
 ```
+
+Press `Ctrl+C` to exit a program or the interactive repl.
 
 ## Syntax
 
