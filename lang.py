@@ -35,6 +35,9 @@ def run_program(program, repl=False, debug_mode=False):
 
     except Exception as e:
         er.print_error(e)
+    except KeyboardInterrupt:
+        print("\nProgram ended by user.")
+        sys.exit()
     except Exception as e:
         raise Exception
 
@@ -47,5 +50,9 @@ if len(sys.argv) >= 2:
         run_program(program, debug_mode=args.debug)
 else:
     while True:
-        program = input(">>> ")
-        run_program(program, repl=True)
+        try:
+            program = input(">>> ")
+            run_program(program, repl=True)
+        except KeyboardInterrupt:
+            print("\nProgram ended by user.")
+            break
