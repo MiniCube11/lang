@@ -138,32 +138,38 @@ class Parser:
         return self.or_expr(tokens)
 
     def or_expr(self, tokens):
-        if res := self.find_expr(tokens, tt.C_OR):
+        res = self.find_expr(tokens, tt.C_OR)
+        if res:
             return res
         return self.and_expr(tokens)
 
     def and_expr(self, tokens):
-        if res := self.find_expr(tokens, tt.C_AND):
+        res = self.find_expr(tokens, tt.C_AND)
+        if res:
             return res
         return self.compare_equals_expr(tokens)
 
     def compare_equals_expr(self, tokens):
-        if res := self.find_expr(tokens, *list(tt.COMP_OPERATORS.values())):
+        res = self.find_expr(tokens, *list(tt.COMP_OPERATORS.values()))
+        if res:
             return res
         return self.plus_minus_expr(tokens)
 
     def plus_minus_expr(self, tokens):
-        if res := self.find_expr(tokens, tt.C_PLUS, tt.C_MINUS, check_unary=True):
+        res = self.find_expr(tokens, tt.C_PLUS, tt.C_MINUS, check_unary=True)
+        if res:
             return res
         return self.mul_div_expr(tokens)
 
     def mul_div_expr(self, tokens):
-        if res := self.find_expr(tokens, tt.C_MUL, tt.C_DIV):
+        res = self.find_expr(tokens, tt.C_MUL, tt.C_DIV)
+        if res:
             return res
         return self.unary_expr(tokens)
 
     def unary_expr(self, tokens):
-        if res := self.match(tokens[0], tt.C_MINUS):
+        res = self.match(tokens[0], tt.C_MINUS)
+        if res:
             return UnaryExpr(res, self.expression(tokens[1:]))
         return self.single_token(tokens)
 

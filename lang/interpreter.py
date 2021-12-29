@@ -57,14 +57,16 @@ class Interpreter:
         if self.evaluate(expression.condition):
             result = []
             for stmt in expression.statements:
-                if res := self.evaluate(stmt):
+                res = self.evaluate(stmt)
+                if res:
                     result.append(res)
             return result
         else:
             if expression.else_statements:
                 result = []
                 for stmt in expression.else_statements:
-                    if res := self.evaluate(stmt):
+                    res = self.evaluate(stmt)
+                    if res:
                         result.append(res)
                 return result
 
@@ -72,7 +74,8 @@ class Interpreter:
         result = []
         while self.evaluate(expression.condition):
             for stmt in expression.statements:
-                if res := self.evaluate(stmt):
+                res = self.evaluate(stmt)
+                if res:
                     result.append(res)
         return result
 
