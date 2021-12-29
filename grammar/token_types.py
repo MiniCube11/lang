@@ -23,6 +23,7 @@ OR = '||'
 IF = 'if'
 ELSE = 'else'
 WHILE = 'while'
+PRINT = 'print'
 
 NEWLINE = '\n'
 
@@ -54,6 +55,7 @@ C_KEYWORD = "KEYWORD"
 C_IF = "IF"
 C_ELSE = "ELSE"
 C_WHILE = "WHILE"
+C_PRINT = "PRINT"
 
 C_EOF = "EOF"
 
@@ -84,7 +86,8 @@ BOOL_OPERATORS = {
 KEYWORDS = {
     IF: C_IF,
     ELSE: C_ELSE,
-    WHILE: C_WHILE
+    WHILE: C_WHILE,
+    PRINT: C_PRINT
 }
 
 BOOL_OPERATOR_CHARS = {AMPER, VBAR}

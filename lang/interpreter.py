@@ -1,6 +1,6 @@
 import grammar.token_types as tt
 import classes.errors as er
-from classes.stmt import IfStmt, WhileStmt
+from classes.stmt import IfStmt, WhileStmt, PrintStmt
 from classes.expr import AssignExpr, Expr, UnaryExpr
 from classes.token import Token
 from classes.datatypes import Number, String, Identifier
@@ -11,15 +11,16 @@ class Interpreter:
         self.environment = environment
 
     def interpret(self, statements):
-        results = []
+        self.results = []
+        self.printed_results = []
         for stmt in statements:
             interpret_res = self.interpret_expr(stmt)
             if isinstance(interpret_res, list):
                 for value in interpret_res:
-                    results.append(self.format_value(value))
+                    self.results.append(self.format_value(value))
             else:
-                results.append(interpret_res)
-        return results
+                self.results.append(interpret_res)
+        return self.printed_results
 
     def format_value(self, value):
         if value is True:
@@ -37,6 +38,8 @@ class Interpreter:
             return self.ev_if_stmt(expression)
         if isinstance(expression, WhileStmt):
             return self.ev_while_stmt(expression)
+        if isinstance(expression, PrintStmt):
+            return self.ev_print_stmt(expression)
         if isinstance(expression, AssignExpr):
             return self.ev_assignment(expression)
         if isinstance(expression, Expr):
@@ -71,6 +74,11 @@ class Interpreter:
             for stmt in expression.statements:
                 if res := self.evaluate(stmt):
                     result.append(res)
+        return result
+
+    def ev_print_stmt(self, expression):
+        result = self.evaluate(expression.expression)
+        self.printed_results.append(result)
         return result
 
     def ev_assignment(self, expression):

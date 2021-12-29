@@ -15,3 +15,11 @@ class WhileStmt:
 
     def __repr__(self):
         return f"(WHILE {self.condition} {self.statements})"
+
+
+class PrintStmt:
+    def __init__(self, expression):
+        self.expression = expression
+
+    def __repr__(self):
+        return f"(PRINT {self.expression})"

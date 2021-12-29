@@ -1,7 +1,7 @@
 from collections import deque
 import grammar.token_types as tt
 import classes.errors as er
-from classes.stmt import IfStmt, WhileStmt
+from classes.stmt import IfStmt, WhileStmt, PrintStmt
 from classes.expr import AssignExpr, Expr, UnaryExpr
 from classes.datatypes import Number, String, Identifier
 
@@ -26,6 +26,8 @@ class Parser:
             return self.if_stmt(tokens)
         if tokens[self.curr].value == tt.C_WHILE:
             return self.while_stmt(tokens)
+        if tokens[self.curr].value == tt.C_PRINT:
+            return self.print_stmt(tokens)
         end_token_index = self.end_token_index(self.curr, tokens, lcurl=lcurl)
         curr_tokens = tokens[self.curr:end_token_index]
         stmt = None
@@ -57,6 +59,12 @@ class Parser:
         condition = self.find_condition(tokens, tt.WHILE)
         statements = self.find_block_or_stmt(tokens, tt.WHILE)
         return WhileStmt(self.expression(condition), statements)
+
+    def print_stmt(self, tokens):
+        start_pos = self.curr
+        while self.curr < len(tokens) and not self.match(tokens[self.curr], tt.C_EOF):
+            self.curr += 1
+        return PrintStmt(self.expression(tokens[start_pos+1:self.curr]))
 
     def find_condition(self, tokens, keyword):
         start_pos = self.curr

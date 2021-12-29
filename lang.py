@@ -21,12 +21,16 @@ args, uknownargs = argparser.parse_known_args()
 def run_program(program, debug_mode=False):
     try:
         tokens = lexer.get_tokens(program)
-        parse_result = parser.parse(tokens)
-        result = interpreter.interpret(parse_result)
         if debug_mode:
             print(tokens)
+
+        parse_result = parser.parse(tokens)
+        if debug_mode:
             print(parse_result)
+
+        result = interpreter.interpret(parse_result)
         print(*result, sep='\n')
+
     except Exception as e:
         er.print_error(e)
     except Exception as e:
