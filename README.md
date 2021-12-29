@@ -2,8 +2,6 @@
 
 A toy interpreted programming language written in Python.
 
-_The language is incomplete. There are currently no print statements so all expressions are printed, which may make the output a bit messy._
-
 ## Run this project
 
 Make sure you have the latest Python version installed.
@@ -22,20 +20,22 @@ python lang.py <name-of-file>
 
 ## Syntax
 
+Expressions follow normal BEDMAS rules.
+
 ```
 1 + 1
 3 - 2 * -6 / 3
 (1 + 1) * 3
 ```
 
-Expressions follow normal BEDMAS rules.
+Logical and comparison operators follow the C-style syntax.
 
 ```
 1 == 2
 1 == 1 && 3 >= 0
 ```
 
-Logical and comparison operators follow the C-style syntax.
+Variables can be used once they have been assigned a value. Variable assignments are treated as expressions and can be used in arithmetic expressions.
 
 ```
 a = 1
@@ -43,7 +43,7 @@ a = a + 3
 1 + b = 1
 ```
 
-Variables can be used once they have been assigned a value. Variable assignments are treated as expressions and can be used in arithmetic expressions.
+If statements and while loops follow C-style syntax.
 
 ```
 if (a == 1) {
@@ -55,7 +55,11 @@ while (a < 10) {
 }
 ```
 
-If statements and while loops follow C-style syntax.
+Adding the print keyword before an expression will print the interpreted result to the terminal.
+
+```
+print "Hello World!"
+```
 
 ## Project Structure
 
